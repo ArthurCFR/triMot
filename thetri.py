@@ -38,6 +38,18 @@ def fetch_gist_data():
         
         if GIST_FILENAME in gist_data["files"]:
             content = gist_data["files"][GIST_FILENAME]["content"]
+            
+            # Debug: show raw content
+            with st.expander("🔍 Debug - Contenu brut du gist"):
+                st.text(f"Longueur: {len(content)} caractères")
+                st.text(f"Premiers 100 caractères: {repr(content[:100])}")
+                st.code(content, language="json")
+            
+            # Clean content - remove BOM and normalize whitespace
+            content = content.strip()
+            if content.startswith('\ufeff'):  # Remove BOM
+                content = content[1:]
+            
             return json.loads(content)
         else:
             st.error(f"Fichier {GIST_FILENAME} non trouvé dans le gist.")
@@ -47,6 +59,7 @@ def fetch_gist_data():
         return None
     except json.JSONDecodeError as e:
         st.error(f"Erreur lors du parsing JSON: {e}")
+        st.error(f"Contenu problématique autour du caractère {e.pos}: {repr(content[max(0, e.pos-20):e.pos+20])}")
         return None
 
 def update_gist_data(data):
