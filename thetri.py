@@ -39,12 +39,6 @@ def fetch_gist_data():
         if GIST_FILENAME in gist_data["files"]:
             content = gist_data["files"][GIST_FILENAME]["content"]
             
-            # Debug: show raw content
-            with st.expander("🔍 Debug - Contenu brut du gist"):
-                st.text(f"Longueur: {len(content)} caractères")
-                st.text(f"Premiers 100 caractères: {repr(content[:100])}")
-                st.code(content, language="json")
-            
             # Clean content - remove BOM and normalize whitespace
             content = content.strip()
             if content.startswith('\ufeff'):  # Remove BOM
@@ -121,37 +115,44 @@ def trier_les_mots(data):
         st.info("Aucun mot à trier pour le moment.")
         return
     
-    st.write(f"**{len(mots_non_tries)} mots** à trier")
+    st.write(f"**{len(mots_non_tries)} mots** restants à trier")
+    st.markdown("---")
     
-    # Select word to sort
-    if mots_non_tries:
-        mot_a_trier = st.selectbox("Choisir un mot à trier:", mots_non_tries)
+    # Get the first word to sort
+    mot_a_trier = mots_non_tries[0]
+    
+    # Display word in large font
+    st.markdown(f"<h1 style='text-align: center; font-size: 4em; margin: 0.5em 0;'>{mot_a_trier}</h1>", 
+                unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    # Create buttons for each category
+    cols = st.columns(len(CATEGORIES))
+    
+    for i, categorie in enumerate(CATEGORIES.keys()):
+        with cols[i]:
+            if st.button(categorie, key=f"btn_{categorie}", use_container_width=True):
+                trier_mot(data, mot_a_trier, categorie)
+
+def trier_mot(data, mot, categorie):
+    """Sort a word into a category"""
+    if mot in data["MotsNonTriés"]:
+        data["MotsNonTriés"].remove(mot)
         
-        # Select category
-        col1, col2 = st.columns([2, 1])
+        # Add to selected category
+        if categorie not in data:
+            data[categorie] = []
+        if isinstance(data[categorie], dict):
+            data[categorie] = []
+        data[categorie].append(mot)
         
-        with col1:
-            categorie = st.selectbox("Choisir une catégorie:", list(CATEGORIES.keys()))
-        
-        with col2:
-            if st.button("Trier le mot", type="primary"):
-                # Move word from MotsNonTriés to selected category
-                if mot_a_trier in data["MotsNonTriés"]:
-                    data["MotsNonTriés"].remove(mot_a_trier)
-                    
-                    # Add to selected category
-                    if categorie not in data:
-                        data[categorie] = []
-                    if isinstance(data[categorie], dict):
-                        data[categorie] = []
-                    data[categorie].append(mot_a_trier)
-                    
-                    # Update gist
-                    if update_gist_data(data):
-                        st.success(f"'{mot_a_trier}' a été trié dans '{categorie}'!")
-                        st.rerun()
-                    else:
-                        st.error("Erreur lors de la sauvegarde.")
+        # Update gist
+        if update_gist_data(data):
+            st.success(f"'{mot}' a été trié dans '{categorie}'!")
+            st.rerun()
+        else:
+            st.error("Erreur lors de la sauvegarde.")
 
 def voir_mots_tries(data):
     """Interface for viewing sorted words"""
