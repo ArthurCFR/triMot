@@ -10,7 +10,7 @@ st.set_page_config(page_title="Tri des Mots", page_icon="📝", layout="wide")
 # Configuration - you'll need to set these as Streamlit secrets
 GIST_ID = st.secrets.get("GIST_ID", "")
 GITHUB_TOKEN = st.secrets.get("GITHUB_TOKEN", "")
-GIST_FILENAME = "gistfile1.txt"
+GIST_FILENAME = "mots.json"
 
 # Categories available for sorting
 CATEGORIES = {
