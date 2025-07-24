@@ -133,7 +133,7 @@ def trier_les_mots(data):
                     # Update gist
                     if update_gist_data(data):
                         st.success(f"'{mot_a_trier}' a été trié dans '{categorie}'!")
-                        st.experimental_rerun()
+                        st.rerun()
                     else:
                         st.error("Erreur lors de la sauvegarde.")
 
