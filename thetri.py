@@ -50,6 +50,9 @@ def fetch_gist_data():
             if content.startswith('\ufeff'):  # Remove BOM
                 content = content[1:]
             
+            # Replace non-breaking spaces with regular spaces
+            content = content.replace('\xa0', ' ')
+            
             return json.loads(content)
         else:
             st.error(f"Fichier {GIST_FILENAME} non trouvé dans le gist.")
